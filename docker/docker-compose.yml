@@ -1,0 +1,247 @@
+# AI Agent Docker Compose Configuration
+# Zero-defect policy: multi-platform container orchestration
+
+version: '3.8'
+
+services:
+  # Ubuntu-based AI Agent
+  ai-agent-ubuntu:
+    build:
+      context: .
+      dockerfile: docker/ubuntu/Dockerfile
+    image: ai-agent:ubuntu
+    container_name: ai-agent-ubuntu
+    hostname: ai-agent-ubuntu
+    environment:
+      - USE_XVFB=true
+      - DISPLAY=:99
+      - AI_AGENT_LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./sessions:/app/sessions
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import ai_agent; print('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # CentOS-based AI Agent
+  ai-agent-centos:
+    build:
+      context: .
+      dockerfile: docker/centos/Dockerfile
+    image: ai-agent:centos
+    container_name: ai-agent-centos
+    hostname: ai-agent-centos
+    environment:
+      - USE_XVFB=true
+      - DISPLAY=:99
+      - AI_AGENT_LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./sessions:/app/sessions
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "8081:8080"
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import ai_agent; print('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Alpine-based AI Agent (minimal)
+  ai-agent-alpine:
+    build:
+      context: .
+      dockerfile: docker/alpine/Dockerfile
+    image: ai-agent:alpine
+    container_name: ai-agent-alpine
+    hostname: ai-agent-alpine
+    environment:
+      - USE_XVFB=true
+      - DISPLAY=:99
+      - AI_AGENT_LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./sessions:/app/sessions
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "8082:8080"
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import ai_agent; print('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # macOS cross-platform AI Agent
+  ai-agent-macos:
+    build:
+      context: .
+      dockerfile: docker/macos/Dockerfile
+    image: ai-agent:macos
+    container_name: ai-agent-macos
+    hostname: ai-agent-macos
+    environment:
+      - USE_XVFB=true
+      - DISPLAY=:99
+      - AI_AGENT_LOG_LEVEL=INFO
+      - AI_AGENT_PLATFORM=macos
+      - AI_AGENT_MACOS_COMPATIBILITY=true
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./sessions:/app/sessions
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "8083:8080"
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import ai_agent; print('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Windows cross-platform AI Agent
+  ai-agent-windows:
+    build:
+      context: .
+      dockerfile: docker/windows/Dockerfile
+      platforms:
+        - linux/amd64
+    image: ai-agent:windows
+    container_name: ai-agent-windows
+    hostname: ai-agent-windows
+    environment:
+      - AI_AGENT_LOG_LEVEL=INFO
+      - SkipXvfb=true
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./sessions:/app/sessions
+      - ./config.yaml:/app/config.yaml:ro
+    ports:
+      - "8084:8080"
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "powershell", "-Command", ".venv\\Scripts\\python -c \"import ai_agent; print('healthy')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development environment with all tools
+  ai-agent-dev:
+    build:
+      context: .
+      dockerfile: docker/ubuntu/Dockerfile
+    image: ai-agent:dev
+    container_name: ai-agent-dev
+    hostname: ai-agent-dev
+    environment:
+      - USE_XVFB=true
+      - DISPLAY=:99
+      - AI_AGENT_LOG_LEVEL=DEBUG
+      - AI_AGENT_DEV_MODE=true
+    volumes:
+      - .:/app:delegated
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./sessions:/app/sessions
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8085:8080"
+      - "8000:8000"  # Development server
+    networks:
+      - ai-agent-network
+    restart: unless-stopped
+    command: ["tail", "-f", "/dev/null"]  # Keep container running
+
+  # Testing environment
+  ai-agent-test:
+    build:
+      context: .
+      dockerfile: docker/ubuntu/Dockerfile
+    image: ai-agent:test
+    container_name: ai-agent-test
+    hostname: ai-agent-test
+    environment:
+      - USE_XVFB=true
+      - DISPLAY=:99
+      - AI_AGENT_LOG_LEVEL=DEBUG
+      - AI_AGENT_TEST_MODE=true
+    volumes:
+      - .:/app:delegated
+      - ./test-results:/app/test-results
+      - ./logs:/app/logs
+    networks:
+      - ai-agent-network
+    profiles:
+      - testing
+    command: ["python", "-m", "pytest", "tests/", "-v", "--html=/app/test-results/report.html"]
+
+networks:
+  ai-agent-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  logs:
+    driver: local
+  screenshots:
+    driver: local
+  sessions:
+    driver: local
+  test-results:
+    driver: local
+
+# Profile-based service selection
+profiles:
+  minimal:
+    services:
+      - ai-agent-alpine
+  
+  development:
+    services:
+      - ai-agent-dev
+  
+  testing:
+    services:
+      - ai-agent-test
+  
+  production:
+    services:
+      - ai-agent-ubuntu
+      - ai-agent-centos
+  
+  cross-platform:
+    services:
+      - ai-agent-ubuntu
+      - ai-agent-centos
+      - ai-agent-alpine
+      - ai-agent-macos
+      - ai-agent-windows
