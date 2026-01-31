@@ -1,14 +1,8 @@
-# AI Agent Configuration
-# 2-Phase Architecture: Gemini 3 Flash via Ollama Only
+# VEXIS-1 Configuration
 
-# API Configuration - Ollama Only
 api:
   preferred_provider: "ollama"
   local_endpoint: "http://localhost:11434"
   local_model: "gemini-3-flash-preview:latest"
   timeout: 120
   max_retries: 3
-
-# Note: Replace localhost with your actual Ollama server endpoint
-# For production deployment, consider using environment variables
-# Example: local_endpoint: "${OLLAMA_ENDPOINT:-http://localhost:11434}"
