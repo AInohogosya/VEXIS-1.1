@@ -1,6 +1,6 @@
 """
 Model Runner for AI Agent System
-2-Phase Vision-Only Architecture: Gemini 3 Flash via Ollama Only
+2-Phase Vision-Only Architecture: Ollama Cloud Models Only
 """
 
 import json
@@ -148,7 +148,7 @@ Provide only the numbered list; do not include additional text.""",
 
 
 class ModelRunner:
-    """2-Phase Architecture Model Runner: Gemini 3 Flash via Ollama Only"""
+    """2-Phase Architecture Model Runner: Ollama Cloud Models Only"""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or load_config().api.__dict__
@@ -161,11 +161,11 @@ class ModelRunner:
         self.logger.info(
             "Model runner initialized for 2-Phase Architecture",
             provider="ollama",
-            model=self.config.get("local_model", "gemini-3-flash-preview:latest"),
+            model=self.config.get("local_model", "ollama-cloud-model:latest"),
         )
     
     def run_model(self, request: ModelRequest) -> ModelResponse:
-        """Run Gemini 3 Flash model for 2-Phase Architecture"""
+        """Run AI model for 2-Phase Architecture"""
         start_time = time.time()
         
         try:
@@ -175,14 +175,14 @@ class ModelRunner:
             # Format prompt
             prompt = self._format_prompt(request)
             
-            # Create API request for Gemini 3 Flash via Ollama
+            # Create API request for AI model via Ollama
             api_request = APIRequest(
                 prompt=prompt,
                 image_data=request.image_data,
                 image_format=request.image_format,
                 max_tokens=request.max_tokens,
                 temperature=request.temperature,
-                model=self.config.get("local_model", "gemini-3-flash-preview:latest"),
+                model=self.config.get("local_model", "gemini-3-flash-preview:cloud"),
                 provider=APIProvider.OLLAMA,
             )
             
@@ -204,7 +204,7 @@ class ModelRunner:
             
             # Log success
             self.logger.info(
-                "Gemini 3 Flash execution successful",
+                "AI model execution successful",
                 task_type=request.task_type.value,
                 model=api_response.model,
                 provider=api_response.provider,
@@ -230,7 +230,7 @@ class ModelRunner:
             )
             
             self.logger.error(
-                "Gemini 3 Flash execution failed",
+                "AI model execution failed",
                 task_type=request.task_type.value,
                 error=str(e),
                 latency=error_response.latency,

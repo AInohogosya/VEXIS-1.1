@@ -34,8 +34,8 @@ This guide covers installation and setup of the AI Agent system across different
 #### Using the Installation Script
 ```bash
 # Clone the repository
-git clone https://github.com/ai-agent/ai-agent.git
-cd ai-agent
+git clone https://github.com/AInohogosya/VEXIS-1.git
+cd VEXIS-1
 
 # Run the automatic installation script
 ./scripts/install/detect_os_and_install.sh
@@ -53,8 +53,8 @@ The script will:
 
 #### Step 1: Clone Repository
 ```bash
-git clone https://github.com/ai-agent/ai-agent.git
-cd ai-agent
+git clone https://github.com/AInohogosya/VEXIS-1.git
+cd VEXIS-1
 ```
 
 #### Step 2: Create Virtual Environment
@@ -111,8 +111,8 @@ sudo yum install -y xorg-x11-server-Xvfb
 #### Using Docker Compose
 ```bash
 # Clone repository
-git clone https://github.com/ai-agent/ai-agent.git
-cd ai-agent
+git clone https://github.com/AInohogosya/VEXIS-1.git
+cd VEXIS-1
 
 # Start with Docker Compose
 docker-compose --profile production up -d
@@ -144,7 +144,7 @@ cp config/config.example.yaml config/config.yaml
 api:
   preferred_provider: "ollama"  # or "openai", "anthropic"
   local_endpoint: "http://localhost:11434"
-  local_model: "gemini-3-flash-preview:latest"
+  local_model: "gemini-3-flash-preview:cloud"
 
 logging:
   level: "INFO"

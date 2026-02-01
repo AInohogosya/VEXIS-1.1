@@ -12,7 +12,7 @@ The name "VEXIS" is derived from the Latin word *Vexillum* (military standard/gu
 - **Vision-based automation**: Uses computer vision to understand GUI elements
 - **Two-phase architecture**: Task list generation + sequential execution
 - **Cross-platform support**: Works on macOS, Windows, and Linux
-- **Multiple AI models**: Supports various AI models including Gemini 3 Flash
+- **Ollama Models**: Supports various AI models via Ollama (local and cloud)
 - **Screenshot capture**: Takes and analyzes screenshots for visual understanding
 - **GUI automation**: Performs clicks, typing, scrolling, and other interactions
 
@@ -21,9 +21,9 @@ The name "VEXIS" is derived from the Latin word *Vexillum* (military standard/gu
 ### Prerequisites
 
 - Python 3.8 or higher
-- [Ollama](https://ollama.ai/) account and installation
-- Ollama running locally on your machine
-- Gemini 3 Flash model pulled in Ollama
+- [Ollama](https://ollama.ai/) installation (optional for cloud models)
+- Ollama running locally for local models (optional for cloud models)
+- Ollama account (required for cloud models only)
 
 ### Platform Support
 
@@ -33,23 +33,24 @@ The name "VEXIS" is derived from the Latin word *Vexillum* (military standard/gu
 
 #### Step 1: Set up Ollama
 
-1. **Create an Ollama account**:
-   - Visit [https://ollama.ai/](https://ollama.ai/)
-   - Sign up for a free account
-
-2. **Install Ollama**:
+1. **Install Ollama**:
    - Download and install Ollama for your operating system from [https://ollama.ai/download](https://ollama.ai/download)
    - Follow the installation instructions for your platform
 
-3. **Start Ollama service**:
+2. **Start Ollama service**:
    - Open your terminal/command prompt
    - Run: `ollama serve`
    - Verify it's running at `http://localhost:11434`
 
-4. **Pull the required model**:
+3. **Set up Ollama account for cloud models** (optional):
    ```bash
-   ollama pull gemini-3-flash-preview:latest
+   # Sign in to your Ollama account for cloud model access
+   ollama signin
    ```
+   
+   **Note**: Cloud models require an Ollama account. After signing in, Ollama automatically handles authentication for cloud models when using the local API endpoint.
+   
+   **Alternative**: For direct API access to `https://ollama.com/api`, you can use an API key from [https://ollama.com/settings/keys](https://ollama.com/settings/keys) and set the `OLLAMA_API_KEY` environment variable.
 
 #### Step 2: Clone and Install VEXIS-1
 
@@ -90,8 +91,8 @@ python3 run.py "your instruction" --debug
 ## 🧠 AI Models Used
 
 This project primarily uses:
-- **Gemini 3 Flash** (via Ollama) - Main model for vision-based tasks
-- **Local inference** through Ollama at `http://localhost:11434`
+- **AI Models via Ollama** - Local and cloud-based models for vision-based tasks
+- **Ollama API** for model inference
 
 ## 📋 Dependencies
 
@@ -121,7 +122,7 @@ The agent can be configured via `config.yaml`:
 api:
   preferred_provider: "ollama"
   local_endpoint: "http://localhost:11434"
-  local_model: "gemini-3-flash-preview:latest"
+  local_model: "gemini-3-flash-preview:cloud"
   timeout: 120
   max_retries: 3
 ```
@@ -193,13 +194,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Common Issues
 
 1. **Ollama connection failed**: Make sure Ollama is running at `http://localhost:11434`
-2. **Model not found**: Ensure you've pulled the Gemini 3 Flash model using `ollama pull gemini-3-flash-preview:latest`
-3. **Permission denied**: On macOS, you may need to grant accessibility permissions for screen recording and keyboard control
-4. **Import errors**: Make sure all dependencies are installed correctly
+2. **Cloud model access denied**: 
+   - Ensure you've run `ollama signin` with a valid Ollama account
+   - Verify your account is in good standing
+3. **Cloud model not found**: Ensure the model `gemini-3-flash-preview:cloud` is available in your region
+4. **Permission denied**: On macOS, you may need to grant accessibility permissions for screen recording and keyboard control
+5. **Import errors**: Make sure all dependencies are installed correctly
 
 ### Getting Help
 
-- Check the [Issues](https://github.com/YOUR_USERNAME/VEXIS-1/issues) page
+- Check the [Issues](https://github.com/AInohogosya/VEXIS-1/issues) page
 - Review the logs for detailed error messages
 - Ensure your environment meets all prerequisites
 

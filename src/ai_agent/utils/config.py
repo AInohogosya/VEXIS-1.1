@@ -28,12 +28,8 @@ class APIConfig:
     """API configuration"""
     # Local Ollama configuration
     local_endpoint: str = "http://localhost:11434"
-    local_model: str = "gemini-3-flash-preview:latest"
+    local_model: str = "gemini-3-flash-preview:cloud"
     
-    # Gemini configuration (disabled)
-    gemini_model: str = "gemini-3-flash"
-    # API key should be set via environment variable AI_AGENT_GEMINI_API_KEY
-    gemini_api_key: Optional[str] = None
     
     # General settings
     timeout: int = 30
@@ -180,8 +176,6 @@ class ConfigManager:
             "AI_AGENT_LOG_JSON": ("logging", "json_format"),
             "AI_AGENT_LOCAL_ENDPOINT": ("api", "local_endpoint"),
             "AI_AGENT_LOCAL_MODEL": ("api", "local_model"),
-            "AI_AGENT_GEMINI_API_KEY": ("api", "gemini_api_key"),
-            "AI_AGENT_GEMINI_MODEL": ("api", "gemini_model"),
             "AI_AGENT_PREFERRED_PROVIDER": ("api", "preferred_provider"),
             "AI_AGENT_API_TIMEOUT": ("api", "timeout"),
             "AI_AGENT_API_MAX_RETRIES": ("api", "max_retries"),
@@ -259,7 +253,6 @@ class ConfigManager:
             "api": {
                 "local_endpoint": self._config.api.local_endpoint,
                 "local_model": self._config.api.local_model,
-                "gemini_model": self._config.api.gemini_model,
                 # API key intentionally excluded to prevent saving sensitive data
                 "preferred_provider": self._config.api.preferred_provider,
                 "timeout": self._config.api.timeout,

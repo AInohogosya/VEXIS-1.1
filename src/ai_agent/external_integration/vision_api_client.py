@@ -1,6 +1,6 @@
 """
 Vision API Client for AI Agent System
-Zero-defect policy: simplified API communication with Ollama and Gemini 3 Flash only
+Zero-defect policy: simplified API communication with Ollama Cloud Models only
 """
 
 import base64
@@ -276,18 +276,21 @@ class OllamaProvider:
     
     @property
     def default_model(self) -> str:
-        return self.config.get("local_model", "gemini-3-flash-preview:latest")
+        return self.config.get("local_model", "gemini-3-flash-preview:cloud")
     
     def analyze_image(self, request: APIRequest) -> APIResponse:
-        """Analyze image using Ollama local API"""
+        """Analyze image using Ollama API (supports both local and cloud models)"""
         try:
             import requests
             import base64
             
-            # Prepare the request payload
+            # Prepare the request payload for /api/chat endpoint
             payload = {
                 "model": request.model or self.default_model,
-                "prompt": request.prompt,
+                "messages": [{
+                    "role": "user",
+                    "content": request.prompt,
+                }],
                 "stream": False,
                 "options": {
                     "temperature": request.temperature,
@@ -295,29 +298,30 @@ class OllamaProvider:
                 }
             }
             
-            # Add image if provided
+            # Add image if provided (for vision models)
             if request.image_data:
                 # Convert image to base64
                 image_base64 = base64.b64encode(request.image_data).decode('utf-8')
-                payload["images"] = [image_base64]
+                payload["messages"][0]["images"] = [image_base64]
             
-            # Make API call
+            # Make API call to /api/chat endpoint
             response = requests.post(
-                f"{self.endpoint}/api/generate",
+                f"{self.endpoint}/api/chat",
                 json=payload,
                 timeout=self.timeout
             )
             
             if response.status_code == 200:
                 result = response.json()
-                content = result.get("response", "")
+                # Extract content from chat response format
+                content = result.get("message", {}).get("content", "")
                 
                 return APIResponse(
                     success=True,
                     content=content,
                     model=request.model or self.default_model,
                     provider=self.name,
-                    cost=0.0,  # Local models are free
+                    cost=0.0,  # Cloud models have costs, but handled by Ollama account
                     tokens_used=result.get("eval_count", None),
                 )
             else:

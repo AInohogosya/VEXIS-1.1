@@ -37,7 +37,7 @@ class TaskGenerator:
     
     
     def generate_tasks(self, instruction: str, screenshot: bytes, context: Optional[Dict[str, Any]] = None) -> TaskList:
-        """Generate task list from instruction and screenshot using Gemini 3 Flash"""
+        """Generate task list from instruction and screenshot using AI model"""
         start_time = time.time()
         
         try:
@@ -50,7 +50,7 @@ class TaskGenerator:
             # Validate inputs
             self._validate_inputs(instruction, screenshot)
             
-            # Generate tasks using AI (Gemini 3 Flash)
+            # Generate tasks using AI model
             model_response = self.model_runner.generate_tasks(instruction, screenshot, context)
             
             if not model_response.success:
