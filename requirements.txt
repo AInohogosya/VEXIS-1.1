@@ -5,6 +5,7 @@ requests>=2.31.0
 opencv-python>=4.8.0
 numpy>=1.24.0
 pynput>=1.7.6
+ollama>=0.1.0
 
 # AI/ML dependencies
 openai>=1.0.0

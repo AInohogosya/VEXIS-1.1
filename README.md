@@ -1,5 +1,4 @@
-<img width="1280" height="720" alt="VEXIS-1" src="https://github.com/user-attachments/assets/7612c621-6dfc-4f15-b968-a80772268032" />
-
+# VEXIS-1
 
 VEXIS-1 is a powerful vision-based AI agent for GUI automation that uses computer vision to understand and interact with graphical user interfaces.
 
@@ -38,9 +37,8 @@ The name "VEXIS" is derived from the Latin word *Vexillum* (military standard/gu
    - Follow the installation instructions for your platform
 
 2. **Start Ollama service**:
-   - Open your terminal/command prompt
-   - Run: `ollama serve`
-   - Verify it's running at `http://localhost:11434`
+   - Ollama automatically starts after installation and serves at `http://localhost:11434`
+   - Verify it's running: `curl http://localhost:11434` (should return "Ollama is running")
 
 3. **Set up Ollama account for cloud models** (optional):
    ```bash
@@ -102,6 +100,7 @@ This project primarily uses:
 - `opencv-python>=4.8.0` - Computer vision
 - `numpy>=1.24.0` - Numerical computations
 - `pynput>=1.7.6` - Input device control
+- `ollama>=0.1.0` - Ollama Python client
 
 ### AI/ML Dependencies
 - `openai>=1.0.0` - OpenAI API support
@@ -209,7 +208,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📚 Documentation
 
-For more detailed documentation, please visit the `docs/` directory or check the inline documentation in the source code.
+For more detailed documentation, please visit the `docs/` directory or check the inline documentation in the source code (e.g., `src/ai_agent/core_processing/two_phase_engine.py`).
 
 ---
 
