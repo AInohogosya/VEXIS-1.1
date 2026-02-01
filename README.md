@@ -2,89 +2,80 @@
 
 VEXIS-1 is a powerful vision-based AI agent for GUI automation that uses computer vision to understand and interact with graphical user interfaces.
 
-## 🏛️ Name Origin
+## 🎯 Try It Now (No Setup Required)
 
-The name "VEXIS" is derived from the Latin word *Vexillum* (military standard/guiding flag). It represents a "flag bearer" that raises the user's intentions and guides the system through chaotic OS environments.
+```bash
+python3 run.py "Take a screenshot"
+```
 
-## 🤖 Features
+That's it! VEXIS-1 automatically handles setup and uses cloud models. No installation or account required.
 
-- **Vision-based automation**: Uses computer vision to understand GUI elements
-- **Two-phase architecture**: Task list generation + sequential execution
-- **Cross-platform support**: Works on macOS, Windows, and Linux
-- **Ollama Models**: Supports various AI models via Ollama (local and cloud)
-- **Screenshot capture**: Takes and analyzes screenshots for visual understanding
-- **GUI automation**: Performs clicks, typing, scrolling, and other interactions
+**More examples:**
+```bash
+python3 run.py "Open calculator and do 2+2"
+python3 run.py "Open browser and go to google.com"
+```
 
-## 🚀 Quick Start
+---
 
-### Prerequisites
+## 📋 What You Need to Know
 
-- Python 3.8 or higher
-- [Ollama](https://ollama.ai/) installation (optional for cloud models)
-- Ollama running locally for local models (optional for cloud models)
-- Ollama account (required for cloud models only)
+### ⚠️ **Safety First**
+VEXIS-1 can perform real actions on your computer - delete files, make purchases, send emails, etc. **Use at your own risk** and always monitor its actions.
 
-### Platform Support
+### 🖥️ Platform Support
+- **Primary**: macOS (fully tested)
+- **Secondary**: Windows, Linux (designed to work, less tested)
 
-**Note**: This project has been primarily tested on macOS. While it is designed to work on Windows and Linux as well, cross-platform compatibility may vary. The codebase includes platform-specific dependencies for all three major operating systems, but testing has been focused on macOS environments.
+### 🤖 How It Works
+1. **Vision-based**: Uses computer vision to see and understand your screen
+2. **Two-phase**: Plans tasks first, then executes them step-by-step
+3. **AI-powered**: Uses smart models to figure out what to do
 
-### Installation
+### 💻 What It Can Do
+- Take screenshots and analyze them
+- Open and use applications (calculator, browser, etc.)
+- Click buttons, type text, scroll
+- Navigate websites and interfaces
+- Automate repetitive GUI tasks
 
-#### Step 1: Set up Ollama
+---
 
-1. **Install Ollama**:
-   - Download and install Ollama for your operating system from [https://ollama.ai/download](https://ollama.ai/download)
-   - Follow the installation instructions for your platform
+## 🚀 Installation
 
-2. **Start Ollama service**:
-   - Ollama automatically starts after installation and serves at `http://localhost:11434`
-   - Verify it's running: `curl http://localhost:11434` (should return "Ollama is running")
+### Quick Install (Recommended)
 
-3. **Set up Ollama account for cloud models** (optional):
-   ```bash
-   # Sign in to your Ollama account for cloud model access
-   ollama signin
-   ```
-   
-   **Note**: Cloud models require an Ollama account. After signing in, Ollama automatically handles authentication for cloud models when using the local API endpoint.
-   
-   **Alternative**: For direct API access to `https://ollama.com/api`, you can use an API key from [https://ollama.com/settings/keys](https://ollama.com/settings/keys) and set the `OLLAMA_API_KEY` environment variable.
-
-#### Step 2: Clone and Install VEXIS-1
-
-1. Clone this repository:
 ```bash
 git clone https://github.com/AInohogosya/VEXIS-1.git
 cd VEXIS-1
-```
-
-2. Install dependencies:
-```bash
 pip install -r requirements.txt
 pip install -e .
 ```
 
-**Note**: The program will automatically check for missing dependencies and prompt you to install them if needed.
+That's it! You're ready to go.
 
-### Usage
+### Local Models Setup (Optional)
 
-Run VEXIS-1 with a simple command:
+If you want to use local AI models instead of cloud:
 
+1. Install [Ollama](https://ollama.ai/download)
+2. Start Ollama service
+3. Run `ollama signin` for cloud model access (optional)
+
+---
+
+## 💻 Usage
+
+### Basic Commands
 ```bash
+# Simple instruction
 python3 run.py "your instruction here"
-```
 
-**Examples:**
-```bash
-python3 run.py "Take a screenshot"
-python3 run.py "Open the calculator and perform 2+2"
-python3 run.py "Open a web browser and navigate to google.com"
-```
-
-For debug mode:
-```bash
+# Debug mode (see what it's thinking)
 python3 run.py "your instruction" --debug
 ```
+
+---
 
 ## 🧠 AI Models Used
 
@@ -92,30 +83,9 @@ This project primarily uses:
 - **AI Models via Ollama** - Local and cloud-based models for vision-based tasks
 - **Ollama API** for model inference
 
-## 📋 Dependencies
-
-### Core Dependencies
-- `Pillow>=10.0.0` - Image processing
-- `pyautogui>=0.9.54` - GUI automation
-- `opencv-python>=4.8.0` - Computer vision
-- `numpy>=1.24.0` - Numerical computations
-- `pynput>=1.7.6` - Input device control
-- `ollama>=0.1.0` - Ollama Python client
-
-### AI/ML Dependencies
-- `openai>=1.0.0` - OpenAI API support
-- `anthropic>=0.7.0` - Anthropic API support
-- `transformers>=4.35.0` - Hugging Face transformers
-- `torch>=2.1.0` - PyTorch
-
-### Platform-specific Dependencies
-- `pyobjc-framework-Cocoa>=9.0` (macOS)
-- `pywin32>=306` (Windows)
-- `python-xlib>=0.33` (Linux)
-
 ## ⚙️ Configuration
 
-The agent can be configured via `config.yaml`:
+Configure via `config.yaml`:
 
 ```yaml
 api:
@@ -128,88 +98,67 @@ api:
 
 ## 🏗️ Architecture
 
-The project uses a two-phase architecture:
+1. **Task Generation**: Analyzes instruction and creates task list
+2. **Execution**: Performs tasks step-by-step with visual feedback
 
-1. **Task Generation Phase**: Analyzes the instruction and generates a task list
-2. **Execution Phase**: Sequentially executes each task with visual feedback
-
-### Key Components
-
+**Key Components:**
 - `TwoPhaseEngine` - Core execution engine
-- `ScreenshotCapture` - Handles screenshot capture and processing
-- `GUIAutomation` - Manages GUI interactions
-- `ModelRunner` - Interfaces with AI models
+- `ScreenshotCapture` - Screen capture and processing
+- `GUIAutomation` - Mouse/keyboard interactions
+- `ModelRunner` - AI model interface
 
-## ⚠️ **IMPORTANT DISCLAIMER**
+## 📋 Dependencies
 
-**WARNING**: VEXIS-1 has the capability to perform automated actions on your computer, including but not limited to:
+**Core:**
+- `Pillow>=10.0.0` - Image processing
+- `pyautogui>=0.9.54` - GUI automation
+- `opencv-python>=4.8.0` - Computer vision
+- `numpy>=1.24.0` - Numerical computations
+- `pynput>=1.7.6` - Input device control
+- `ollama>=0.1.0` - Ollama client
 
-- Deleting files and folders
-- Installing or uninstalling software
-- Making online purchases
-- Sending emails or messages
-- Modifying system settings
-- Executing arbitrary commands
+**AI/ML:**
+- `openai>=1.0.0` - OpenAI API
+- `anthropic>=0.7.0` - Anthropic API
+- `transformers>=4.35.0` - Hugging Face
+- `torch>=2.1.0` - PyTorch
 
-**The developers of this project are NOT responsible for any damage, data loss, financial loss, or any other consequences that may result from using VEXIS-1.**
-
-**Use at your own risk**. Always:
-- Monitor the agent's actions closely
-- Test in a safe environment first
-- Keep backups of important data
-- Never run unattended with critical systems
-
-## 🧪 Development
-
-### Running Tests
-```bash
-pytest
-```
-
-### Code Formatting
-```bash
-black src/
-```
-
-### Type Checking
-```bash
-mypy src/
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+**Platform-specific:**
+- `pyobjc-framework-Cocoa>=9.0` (macOS)
+- `pywin32>=306` (Windows)
+- `python-xlib>=0.33` (Linux)
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+**Common Issues:**
+1. **Ollama connection**: Make sure Ollama runs at `http://localhost:11434`
+2. **Cloud access denied**: Run `ollama signin` with valid account
+3. **Model not found**: Check if `gemini-3-flash-preview:cloud` is available in your region
+4. **Permission denied**: Grant accessibility permissions on macOS
+5. **Import errors**: Install missing dependencies
 
-1. **Ollama connection failed**: Make sure Ollama is running at `http://localhost:11434`
-2. **Cloud model access denied**: 
-   - Ensure you've run `ollama signin` with a valid Ollama account
-   - Verify your account is in good standing
-3. **Cloud model not found**: Ensure the model `gemini-3-flash-preview:cloud` is available in your region
-4. **Permission denied**: On macOS, you may need to grant accessibility permissions for screen recording and keyboard control
-5. **Import errors**: Make sure all dependencies are installed correctly
+**Getting Help:**
+- [Issues page](https://github.com/AInohogosya/VEXIS-1/issues)
+- Check logs for detailed errors
+- Verify environment setup
 
-### Getting Help
+## 🧪 Development
 
-- Check the [Issues](https://github.com/AInohogosya/VEXIS-1/issues) page
-- Review the logs for detailed error messages
-- Ensure your environment meets all prerequisites
+```bash
+pytest          # Run tests
+black src/       # Format code
+mypy src/        # Type checking
+```
+
+## 📄 License & Contributing
+
+- **License**: MIT - see [LICENSE](LICENSE) file
+- **Contributing**: Fork → Create branch → Make changes → Add tests → Pull request
 
 ## 📚 Documentation
 
-For more detailed documentation, please visit the `docs/` directory or check the inline documentation in the source code (e.g., `src/ai_agent/core_processing/two_phase_engine.py`).
+Detailed docs in `docs/` directory and inline in source code (e.g., `src/ai_agent/core_processing/two_phase_engine.py`).
 
 ---
 
-**Remember**: VEXIS-1 is a powerful automation tool. Use responsibly and always verify actions before running them in production environments.
+**Remember**: VEXIS-1 is a powerful automation tool. Use responsibly and always verify actions before running in production environments.
