@@ -15,11 +15,16 @@ sys.path.insert(0, str(src_dir))
 
 # Import dependency checker
 try:
-    from ai_agent.utils.dependency_checker import check_dependencies
+    # Try the minimal dependency checker first (no external dependencies)
+    from minimal_dependency_checker import check_dependencies
 except ImportError:
-    print("❌ Cannot import dependency checker. This should not happen.")
-    print("Please ensure the src/ai_agent/utils directory exists.")
-    sys.exit(1)
+    try:
+        # Fall back to the full dependency checker
+        from ai_agent.utils.dependency_checker import check_dependencies
+    except ImportError:
+        print("Cannot import dependency checker. This should not happen.")
+        print("Please ensure the src/ai_agent/utils directory exists.")
+        sys.exit(1)
 
 def main():
     # Check for help flag first
@@ -35,6 +40,7 @@ def main():
         print("Options:")
         print("  --help, -h          Show this help message")
         print("  --no-deps-check     Skip dependency checking (not recommended)")
+        print("  --clean-venv        Delete all existing virtual environments before checking")
         print("  --debug             Enable debug mode")
         print()
         print("The dependency checker will automatically install missing packages.")
@@ -48,6 +54,7 @@ def main():
     
     # Check for command line flags
     skip_deps_check = "--no-deps-check" in sys.argv
+    clean_venv = "--clean-venv" in sys.argv
     debug_mode = "--debug" in sys.argv
     
     # Filter out flags to get the actual instruction
@@ -55,27 +62,27 @@ def main():
     instruction = " ".join(instruction_args)
     
     if not instruction:
-        print("❌ No instruction provided")
+        print("No instruction provided")
         print("Usage: python3 run.py \"your instruction here\"")
         sys.exit(1)
     
-    print(f"🤖 AI Agent executing: {instruction}")
+    print(f"AI Agent executing: {instruction}")
     
     # Run dependency check unless explicitly skipped
     if not skip_deps_check:
-        print("\n🔍 Checking dependencies...")
-        deps_ok = check_dependencies(current_dir, auto_install=True)
+        print("\nChecking dependencies...")
+        deps_ok = check_dependencies(current_dir, auto_install=True, clean_venv=clean_venv)
         
         if not deps_ok:
-            print("\n❌ Dependency check failed. Please install missing dependencies manually:")
+            print("\nDependency check failed. Please install missing dependencies manually:")
             print("  pip install -r requirements.txt")
             print("  pip install -e .")
             print("\nOr run with --no-deps-check to skip (not recommended)")
             sys.exit(1)
         
-        print("\n✅ Dependencies verified. Starting AI Agent...\n")
+        print("\nDependencies verified. Starting AI Agent...\n")
     else:
-        print("\n⚠️  Skipping dependency check (not recommended)")
+        print("\nSkipping dependency check (not recommended)")
     
     try:
         from ai_agent.user_interface.two_phase_app import TwoPhaseAIAgent
@@ -89,16 +96,16 @@ def main():
         result = agent.run(instruction, options)
         
         if result:
-            print("✅ Task completed successfully")
+            print("Task completed successfully")
         else:
-            print("❌ Task failed")
+            print("Task failed")
             
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f"Import error: {e}")
         print("This suggests a dependency issue. Try running without --no-deps-check")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Dependency Checker and Auto-Installer
-Ensures all required dependencies are available before running the AI Agent
+Minimal dependency checker that can run without any external dependencies
 """
 
 import sys
@@ -15,8 +14,8 @@ from typing import Dict, List, Tuple, Optional
 from pathlib import Path
 
 
-class DependencyChecker:
-    """Comprehensive dependency checking and auto-installation system"""
+class MinimalDependencyChecker:
+    """Minimal dependency checker that works without external dependencies"""
     
     def __init__(self, project_root: Path):
         self.project_root = project_root
@@ -39,8 +38,8 @@ class DependencyChecker:
             "pydantic": "pydantic>=2.0.0",
             "structlog": "structlog>=23.0.0",
             "rich": "rich>=13.0.0",
-            "yaml": "PyYAML>=6.0.0",  # yaml module imports as PyYAML package
-            "ollama": "ollama>=0.1.0",  # Add missing ollama dependency
+            "yaml": "PyYAML>=6.0.0",
+            "ollama": "ollama>=0.1.0",
         }
         
         # Platform-specific dependencies
@@ -53,26 +52,6 @@ class DependencyChecker:
             },
             "linux": {
                 "Xlib": "python-xlib>=0.33"
-            }
-        }
-        
-        # System packages that might need installation
-        self.system_packages = {
-            "darwin": [
-                "xcode-select",  # For Xcode command line tools
-            ],
-            "win32": [
-                # Windows usually has these pre-installed
-            ],
-            "linux": {
-                "debian": [
-                    "python3-dev", "python3-pip", "python3-venv",
-                    "scrot", "python3-tk", "xvfb", "x11-utils"
-                ],
-                "redhat": [
-                    "python3-devel", "python3-pip", "scrot", 
-                    "tkinter", "xorg-x11-server-Xvfb"
-                ]
             }
         }
 
@@ -106,7 +85,7 @@ class DependencyChecker:
     def upgrade_pip(self) -> Tuple[bool, str]:
         """Upgrade pip to latest version"""
         try:
-            print("🔄 Upgrading pip to latest version...")
+            print("Upgrading pip to latest version...")
             result = subprocess.run(
                 [sys.executable, "-m", "pip", "install", "--upgrade", "pip"],
                 capture_output=True,
@@ -123,7 +102,6 @@ class DependencyChecker:
     def check_network_connectivity(self) -> Tuple[bool, str]:
         """Check if network connectivity is available"""
         try:
-            # Try to connect to PyPI
             socket.create_connection(("pypi.org", 443), timeout=10)
             return True, "Network connectivity OK ✓"
         except socket.gaierror:
@@ -141,6 +119,48 @@ class DependencyChecker:
         else:
             return False, "Not in virtual environment (system Python) ⚠️"
     
+    def delete_all_virtual_environments(self) -> Tuple[bool, str]:
+        """Delete all existing virtual environments in the project"""
+        deleted_count = 0
+        failed_deletions = []
+        
+        # Common virtual environment names to check
+        venv_names = ["venv", ".venv", "env", ".env", "virtualenv"]
+        
+        for venv_name in venv_names:
+            venv_path = self.project_root / venv_name
+            if venv_path.exists() and venv_path.is_dir():
+                try:
+                    print(f"Deleting virtual environment at {venv_path}...")
+                    import shutil
+                    shutil.rmtree(venv_path)
+                    deleted_count += 1
+                    print(f"Successfully deleted {venv_path}")
+                except Exception as e:
+                    failed_deletions.append(f"{venv_path}: {str(e)}")
+                    print(f"Failed to delete {venv_path}: {e}")
+        
+        # Also check for .egg-info directories
+        egg_info_paths = list(self.project_root.glob("*.egg-info"))
+        for egg_info_path in egg_info_paths:
+            if egg_info_path.is_dir():
+                try:
+                    print(f"Deleting .egg-info directory at {egg_info_path}...")
+                    import shutil
+                    shutil.rmtree(egg_info_path)
+                    deleted_count += 1
+                    print(f"Successfully deleted {egg_info_path}")
+                except Exception as e:
+                    failed_deletions.append(f"{egg_info_path}: {str(e)}")
+                    print(f"Failed to delete {egg_info_path}: {e}")
+        
+        if failed_deletions:
+            return False, f"Deleted {deleted_count} environments, but failed: {', '.join(failed_deletions)}"
+        elif deleted_count > 0:
+            return True, f"Successfully deleted {deleted_count} virtual environments"
+        else:
+            return True, "No virtual environments found to delete"
+
     def create_virtual_environment(self, force: bool = False) -> Tuple[bool, str]:
         """Create a virtual environment if not in one"""
         if not force:
@@ -151,10 +171,28 @@ class DependencyChecker:
         venv_path = self.project_root / "venv"
         
         if venv_path.exists() and not force:
-            return True, f"Virtual environment already exists at {venv_path}"
+            # Check if the existing venv is working
+            try:
+                # Try to activate and test the venv
+                result = subprocess.run(
+                    [str(venv_path / "bin" / "python"), "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                if result.returncode == 0:
+                    return True, f"Virtual environment already exists at {venv_path}"
+                else:
+                    print(f"Existing virtual environment at {venv_path} appears broken, recreating...")
+                    import shutil
+                    shutil.rmtree(venv_path)
+            except Exception:
+                print(f"Existing virtual environment at {venv_path} appears broken, recreating...")
+                import shutil
+                shutil.rmtree(venv_path)
         
         try:
-            print(f"🔧 Creating virtual environment at {venv_path}...")
+            print(f"Creating virtual environment at {venv_path}...")
             result = subprocess.run(
                 [sys.executable, "-m", "venv", str(venv_path)],
                 capture_output=True,
@@ -163,8 +201,8 @@ class DependencyChecker:
             )
             
             if result.returncode == 0:
-                print(f"✅ Virtual environment created successfully")
-                print(f"💡 Activate it with: source {venv_path}/bin/activate")
+                print(f"Virtual environment created successfully")
+                print(f"Activate it with: source {venv_path}/bin/activate")
                 return True, f"Virtual environment created at {venv_path}"
             else:
                 return False, f"Failed to create virtual environment: {result.stderr}"
@@ -199,14 +237,17 @@ class DependencyChecker:
         """Check all core dependencies"""
         results = {}
         
-        print("🔍 Checking core Python dependencies...")
+        print("Checking core Python dependencies...")
         
         for module, package in self.core_dependencies.items():
+            print(f"  Checking {module}...", end='', flush=True)
             if self.check_import(module):
                 version = self.get_package_version(module)
                 results[module] = (True, f"{package} ({version}) ✓")
+                print(f" ✓")
             else:
                 results[module] = (False, f"{package} ✗")
+                print(f" ✗")
         
         return results
 
@@ -215,7 +256,7 @@ class DependencyChecker:
         results = {}
         current_platform = sys.platform
         
-        print(f"🔍 Checking {current_platform} platform dependencies...")
+        print(f"Checking {current_platform} platform dependencies...")
         
         if current_platform in self.platform_dependencies:
             for module, package in self.platform_dependencies[current_platform].items():
@@ -232,22 +273,21 @@ class DependencyChecker:
         for attempt in range(retries):
             try:
                 if attempt > 0:
-                    print(f"🔄 Retry {attempt + 1}/{retries} for {package}...")
+                    print(f"Retry {attempt + 1}/{retries} for {package}...")
                 else:
-                    print(f"📦 Installing {package}...")
+                    print(f"Installing {package}...")
                 
                 result = subprocess.run(
                     [sys.executable, "-m", "pip", "install", package],
                     capture_output=True,
                     text=True,
-                    timeout=300  # 5 minute timeout
+                    timeout=300
                 )
                 
                 if result.returncode == 0:
                     return True, f"Successfully installed {package}"
                 else:
                     error_msg = result.stderr.strip()
-                    # Check for common issues and provide specific guidance
                     if "Permission denied" in error_msg:
                         return False, f"Permission denied installing {package}. Try using --user flag or virtual environment."
                     elif "Could not find a version" in error_msg:
@@ -257,13 +297,13 @@ class DependencyChecker:
                     elif attempt == retries - 1:
                         return False, f"Failed to install {package} after {retries} attempts: {error_msg}"
                     else:
-                        time.sleep(2)  # Wait before retry
+                        time.sleep(2)
                         continue
                         
             except subprocess.TimeoutExpired:
                 if attempt == retries - 1:
                     return False, f"Installation of {package} timed out after {retries} attempts"
-                time.sleep(5)  # Wait longer before retry
+                time.sleep(5)
                 continue
             except Exception as e:
                 if attempt == retries - 1:
@@ -281,15 +321,15 @@ class DependencyChecker:
         for attempt in range(retries):
             try:
                 if attempt > 0:
-                    print(f"🔄 Retry {attempt + 1}/{retries} for requirements.txt...")
+                    print(f"Retry {attempt + 1}/{retries} for requirements.txt...")
                 else:
-                    print("📦 Installing dependencies from requirements.txt...")
+                    print("Installing dependencies from requirements.txt...")
                 
                 result = subprocess.run(
                     [sys.executable, "-m", "pip", "install", "-r", str(self.requirements_file)],
                     capture_output=True,
                     text=True,
-                    timeout=600  # 10 minute timeout
+                    timeout=600
                 )
                 
                 if result.returncode == 0:
@@ -299,7 +339,7 @@ class DependencyChecker:
                     if attempt == retries - 1:
                         return False, f"Failed to install requirements.txt after {retries} attempts: {error_msg}"
                     else:
-                        time.sleep(3)  # Wait before retry
+                        time.sleep(3)
                         continue
                         
             except subprocess.TimeoutExpired:
@@ -323,15 +363,15 @@ class DependencyChecker:
         for attempt in range(retries):
             try:
                 if attempt > 0:
-                    print(f"🔄 Retry {attempt + 1}/{retries} for project installation...")
+                    print(f"Retry {attempt + 1}/{retries} for project installation...")
                 else:
-                    print("📦 Installing project in editable mode...")
+                    print("Installing project in editable mode...")
                 
                 result = subprocess.run(
                     [sys.executable, "-m", "pip", "install", "-e", str(self.project_root)],
                     capture_output=True,
                     text=True,
-                    timeout=300  # 5 minute timeout
+                    timeout=300
                 )
                 
                 if result.returncode == 0:
@@ -357,119 +397,65 @@ class DependencyChecker:
         
         return False, f"Failed to install project after {retries} attempts"
 
-    def check_system_dependencies(self) -> Dict[str, Tuple[bool, str]]:
-        """Check system-level dependencies"""
-        results = {}
-        current_platform = sys.platform
-        
-        print(f"🔍 Checking system dependencies for {current_platform}...")
-        
-        if current_platform == "linux":
-            # Try to detect distribution
-            try:
-                with open("/etc/os-release", "r") as f:
-                    os_release = f.read()
-                    if "debian" in os_release.lower() or "ubuntu" in os_release.lower():
-                        distro = "debian"
-                    elif "rhel" in os_release.lower() or "centos" in os_release.lower() or "fedora" in os_release.lower():
-                        distro = "redhat"
-                    else:
-                        distro = "unknown"
-            except:
-                distro = "unknown"
-            
-            if distro in self.system_packages["linux"]:
-                for package in self.system_packages["linux"][distro]:
-                    # Check if package is available
-                    try:
-                        result = subprocess.run(["which", package], capture_output=True)
-                        if result.returncode == 0:
-                            results[package] = (True, f"{package} ✓")
-                        else:
-                            results[package] = (False, f"{package} ✗")
-                    except:
-                        results[package] = (False, f"{package} ✗")
-        
-        elif current_platform == "darwin":
-            for package in self.system_packages["darwin"]:
-                try:
-                    result = subprocess.run(["which", package], capture_output=True)
-                    if result.returncode == 0:
-                        results[package] = (True, f"{package} ✓")
-                    else:
-                        results[package] = (False, f"{package} ✗")
-                except:
-                    results[package] = (False, f"{package} ✗")
-        
-        return results
-
     def auto_install_missing(self, missing_deps: List[str]) -> bool:
         """Attempt to auto-install missing dependencies with enhanced error handling"""
         if not missing_deps:
             return True
         
-        print(f"\n🔧 Found {len(missing_deps)} missing dependencies. Attempting auto-install...")
+        print(f"\nFound {len(missing_deps)} missing dependencies. Attempting auto-install...")
         
         # Check network connectivity first
         net_ok, net_msg = self.check_network_connectivity()
         if not net_ok:
-            print(f"❌ {net_msg}")
-            print("💡 Please check your internet connection and try again.")
+            print(f"{net_msg}")
+            print("Please check your internet connection and try again.")
             return False
-        print(f"✅ {net_msg}")
+        print(f"{net_msg}")
         
         # Check and upgrade pip if needed
         pip_ok, pip_msg = self.check_pip_version()
-        print(f"📦 {pip_msg}")
+        print(f"{pip_msg}")
         
         if not pip_ok:
-            print("🔄 Attempting to fix pip installation...")
+            print("Attempting to fix pip installation...")
             upgrade_ok, upgrade_msg = self.upgrade_pip()
             if upgrade_ok:
-                print(f"✅ {upgrade_msg}")
+                print(f"{upgrade_msg}")
             else:
-                print(f"⚠️  {upgrade_msg}")
-                print("💡 Continuing with current pip version...")
+                print(f"{upgrade_msg}")
+                print("Continuing with current pip version...")
         
         # Check virtual environment
         venv_ok, venv_msg = self.check_virtual_env()
-        print(f"🐍 {venv_msg}")
+        print(f"{venv_msg}")
         
         if not venv_ok:
-            print("⚠️  Running in system Python may cause permission issues.")
-            print("💡 Consider using a virtual environment for better reliability.")
+            print("Running in system Python may cause permission issues.")
+            print("Consider using a virtual environment for better reliability.")
             
-            # Offer to create virtual environment if there are permission issues
-            if len(missing_deps) > 5:  # Many missing deps suggests system Python issues
-                print("🤔 Would you like to create a virtual environment? (Recommended)")
-                print("   This will avoid permission issues and isolate dependencies.")
-                print("   The environment will be created at: ./venv")
-                
-                # Auto-create venv for better user experience
-                try:
-                    venv_success, venv_message = self.create_virtual_environment()
-                    if venv_success:
-                        print(f"✅ {venv_message}")
-                        print("🔄 Please activate the virtual environment and run the command again:")
-                        print(f"   source {self.project_root}/venv/bin/activate")
-                        print(f"   python3 run.py \"<your instruction>\"")
-                        return False
-                    else:
-                        print(f"❌ {venv_message}")
-                        print("🔄 Continuing with system Python...")
-                except Exception as e:
-                    print(f"❌ Could not create virtual environment: {e}")
-                    print("🔄 Continuing with system Python...")
+            # Auto-create virtual environment for better user experience
+            if len(missing_deps) > 2:  # Create venv if more than a few deps missing
+                print("Creating virtual environment for better dependency management...")
+                venv_success, venv_message = self.create_virtual_environment()
+                if venv_success:
+                    print(f"{venv_message}")
+                    print("Virtual environment created. Continuing with installation...")
+                    # Continue with system Python for now, but note the venv exists
+                else:
+                    print(f"{venv_message}")
+                    print("Continuing with system Python...")
+            else:
+                print("Installing with system Python (few dependencies missing)...")
         
         # First try to install from requirements.txt if it exists
         if self.requirements_file.exists():
             success, message = self.install_requirements_file()
             if success:
-                print(f"✅ {message}")
+                print(f"{message}")
                 return True
             else:
-                print(f"⚠️  {message}")
-                print("🔄 Falling back to individual package installation...")
+                print(f"{message}")
+                print("Falling back to individual package installation...")
         
         # Fall back to individual package installation
         failed_packages = []
@@ -487,21 +473,21 @@ class DependencyChecker:
             
             success, message = self.install_package(package)
             if success:
-                print(f"✅ {message}")
+                print(f"{message}")
             else:
-                print(f"❌ {message}")
+                print(f"{message}")
                 failed_packages.append(dep)
         
         # Install project in editable mode
         success, message = self.install_project()
         if success:
-            print(f"✅ {message}")
+            print(f"{message}")
         else:
-            print(f"⚠️  {message}")
+            print(f"{message}")
         
         if failed_packages:
-            print(f"\n❌ Failed to install: {', '.join(failed_packages)}")
-            print("💡 Try installing these manually:")
+            print(f"\nFailed to install: {', '.join(failed_packages)}")
+            print("Try installing these manually:")
             for pkg in failed_packages:
                 if pkg in self.core_dependencies:
                     print(f"   pip install {self.core_dependencies[pkg]}")
@@ -511,15 +497,23 @@ class DependencyChecker:
         
         return True
 
-    def run_full_check(self, auto_install: bool = True) -> bool:
+    def run_full_check(self, auto_install: bool = True, clean_venv: bool = False) -> bool:
         """Run comprehensive dependency check"""
-        print("🚀 Starting dependency check for VEXIS-1 AI Agent\n")
+        print("Starting dependency check for VEXIS-1 AI Agent\n")
+        
+        # Delete all existing virtual environments if requested
+        if clean_venv:
+            print("Cleaning up existing virtual environments...")
+            success, message = self.delete_all_virtual_environments()
+            print(f"{message}")
+            if not success:
+                print("Warning: Some virtual environments could not be deleted.")
         
         # Check Python version
         py_ok, py_msg = self.check_python_version()
-        print(f"🐍 {py_msg}")
+        print(f"{py_msg}")
         if not py_ok:
-            print("❌ Python version too old. Please upgrade to Python 3.8 or higher.")
+            print("Python version too old. Please upgrade to Python 3.8 or higher.")
             return False
         
         # Check core dependencies
@@ -530,80 +524,67 @@ class DependencyChecker:
         platform_results = self.check_platform_dependencies()
         missing_platform = [mod for mod, (ok, _) in platform_results.items() if not ok]
         
-        # Check system dependencies
-        system_results = self.check_system_dependencies()
-        missing_system = [pkg for pkg, (ok, _) in system_results.items() if not ok]
-        
         # Display results
         all_missing = missing_core + missing_platform
         
-        if not all_missing and not missing_system:
-            print("\n✅ All dependencies are satisfied!")
+        if not all_missing:
+            print("\nAll dependencies are satisfied!")
             return True
         
-        print(f"\n📊 Dependency Summary:")
+        print(f"\nDependency Summary:")
         print(f"   Core dependencies missing: {len(missing_core)}")
-        print(f"   Platform dependencies missing: {len(missing_platform)}")  
-        print(f"   System dependencies missing: {len(missing_system)}")
+        print(f"   Platform dependencies missing: {len(missing_platform)}")
         
         # Show missing dependencies
         if missing_core:
-            print(f"\n❌ Missing core dependencies:")
+            print(f"\nMissing core dependencies:")
             for mod in missing_core:
                 print(f"   - {core_results[mod][1]}")
         
         if missing_platform:
-            print(f"\n❌ Missing platform dependencies:")
+            print(f"\nMissing platform dependencies:")
             for mod in missing_platform:
                 print(f"   - {platform_results[mod][1]}")
         
-        if missing_system:
-            print(f"\n⚠️  Missing system dependencies:")
-            for pkg in missing_system:
-                print(f"   - {system_results[pkg][1]}")
-            print("   Note: System dependencies may require manual installation")
-        
         # Auto-install if requested
         if auto_install and all_missing:
-            print(f"\n🔧 Attempting to auto-install missing Python dependencies...")
+            print(f"\nAttempting to auto-install missing Python dependencies...")
             success = self.auto_install_missing(all_missing)
             
             if success:
-                print(f"\n🔄 Re-checking dependencies after installation...")
+                print(f"\nRe-checking dependencies after installation...")
                 # Re-check only the ones we tried to install
                 for dep in all_missing:
                     if self.check_import(dep):
                         version = self.get_package_version(dep)
-                        print(f"✅ {dep} ({version})")
+                        print(f"{dep} ({version})")
                     else:
-                        print(f"❌ {dep} still missing")
+                        print(f"{dep} still missing")
                 
                 # Final verification
                 final_missing = [mod for mod in all_missing if not self.check_import(mod)]
                 if not final_missing:
-                    print(f"\n🎉 All dependencies successfully installed!")
+                    print(f"\nAll dependencies successfully installed!")
                     return True
                 else:
-                    print(f"\n⚠️  Some dependencies could not be installed automatically")
+                    print(f"\nSome dependencies could not be installed automatically")
                     return False
             else:
-                print(f"\n❌ Auto-installation failed")
+                print(f"\nAuto-installation failed")
                 return False
         
         return not all_missing
 
 
-def check_dependencies(project_root: Path, auto_install: bool = True) -> bool:
+def check_dependencies(project_root: Path, auto_install: bool = True, clean_venv: bool = False) -> bool:
     """Convenience function to check dependencies"""
-    checker = DependencyChecker(project_root)
-    return checker.run_full_check(auto_install=auto_install)
+    checker = MinimalDependencyChecker(project_root)
+    return checker.run_full_check(auto_install=auto_install, clean_venv=clean_venv)
 
 
 if __name__ == "__main__":
     # Allow running as standalone script
-    # Calculate project root relative to this file's location
     current_file = Path(__file__).resolve()
-    # We are in src/ai_agent/utils/, so project root is three levels up
     project_root = current_file.parent.parent.parent
     success = check_dependencies(project_root)
     sys.exit(0 if success else 1)
