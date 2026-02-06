@@ -43,6 +43,11 @@ def main():
         print("  --clean-venv        Delete all existing virtual environments before checking")
         print("  --debug             Enable debug mode")
         print()
+        print("Virtual Environment:")
+        print("  This script automatically creates and uses a virtual environment")
+        print("  at './venv' to isolate dependencies and avoid system Python issues.")
+        print("  The virtual environment will be created if it doesn't exist.")
+        print()
         print("The dependency checker will automatically install missing packages.")
         sys.exit(0)
     
@@ -67,6 +72,39 @@ def main():
         sys.exit(1)
     
     print(f"AI Agent executing: {instruction}")
+    
+    # Ensure we're in a virtual environment before dependency checking
+    if not skip_deps_check:
+        print("\nEnsuring virtual environment is set up...")
+        from minimal_dependency_checker import MinimalDependencyChecker
+        venv_checker = MinimalDependencyChecker(current_dir)
+        
+        # Check if already in virtual environment
+        venv_ok, venv_msg = venv_checker.check_virtual_env()
+        if not venv_ok:
+            print("Not in virtual environment. Creating one for complete dependency isolation...")
+            venv_success, venv_message = venv_checker.create_virtual_environment()
+            if venv_success:
+                print(f"✓ {venv_message}")
+                print("Note: Virtual environment created. All dependencies will be installed there.")
+                # Exit and instruct user to run with the virtual environment
+                print("\nPlease run the script again to use the virtual environment:")
+                print(f"  {current_dir}/venv/bin/python3 run.py \"{' '.join(instruction_args)}\"")
+                print("Or activate the virtual environment first:")
+                print(f"  source {current_dir}/venv/bin/activate")
+                print("  python3 run.py \"{' '.join(instruction_args)}\"")
+                sys.exit(0)
+            else:
+                print(f"✗ Failed to create virtual environment: {venv_message}")
+                print("ERROR: Virtual environment is required for dependency isolation.")
+                print("Please create one manually:")
+                print(f"  python3 -m venv {current_dir}/venv")
+                print(f"  source {current_dir}/venv/bin/activate")
+                print("  python3 run.py \"your instruction here\"")
+                sys.exit(1)
+        else:
+            print(f"✓ {venv_msg}")
+            print("All dependencies will be installed and used within this virtual environment.")
     
     # Run dependency check unless explicitly skipped
     if not skip_deps_check:

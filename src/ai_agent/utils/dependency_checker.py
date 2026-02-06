@@ -271,23 +271,25 @@ class DependencyChecker:
         return results
 
     def install_package(self, package: str, retries: int = 3, use_venv: bool = True) -> Tuple[bool, str]:
-        """Install a package using pip with retry mechanism"""
+        """Install a package using pip with retry mechanism - VENV ONLY MODE"""
+        # Enforce virtual environment usage
+        if not use_venv:
+            return False, "System Python installation is not allowed. Virtual environment is required."
+        
         # Determine which Python/pip to use
         pip_cmd = None
         python_exe = None
         
-        if use_venv:
-            venv_pip = self.get_venv_pip_executable()
-            if venv_pip:
-                pip_cmd = venv_pip
-                python_exe = self.get_venv_python_executable()
-                print(f"🔧 Using virtual environment: {python_exe}")
-            else:
-                print("🔧 No virtual environment found, using system Python")
+        venv_pip = self.get_venv_pip_executable()
+        if venv_pip:
+            pip_cmd = venv_pip
+            python_exe = self.get_venv_python_executable()
+            print(f"🔧 Using virtual environment: {python_exe}")
+        else:
+            return False, "No virtual environment found. Please create one first."
         
         if not pip_cmd:
-            # Fall back to system Python
-            pip_cmd = [sys.executable, "-m", "pip"]
+            return False, "Virtual environment pip not available. Please recreate the virtual environment."
         
         for attempt in range(retries):
             try:
@@ -337,26 +339,28 @@ class DependencyChecker:
         return False, f"Failed to install {package} after {retries} attempts"
 
     def install_requirements_file(self, retries: int = 2, use_venv: bool = True) -> Tuple[bool, str]:
-        """Install all dependencies from requirements.txt with retry"""
+        """Install all dependencies from requirements.txt with retry - VENV ONLY MODE"""
         if not self.requirements_file.exists():
             return False, "requirements.txt not found"
+        
+        # Enforce virtual environment usage
+        if not use_venv:
+            return False, "System Python installation is not allowed. Virtual environment is required."
         
         # Determine which Python/pip to use
         pip_cmd = None
         python_exe = None
         
-        if use_venv:
-            venv_pip = self.get_venv_pip_executable()
-            if venv_pip:
-                pip_cmd = venv_pip
-                python_exe = self.get_venv_python_executable()
-                print(f"🔧 Using virtual environment: {python_exe}")
-            else:
-                print("🔧 No virtual environment found, using system Python")
+        venv_pip = self.get_venv_pip_executable()
+        if venv_pip:
+            pip_cmd = venv_pip
+            python_exe = self.get_venv_python_executable()
+            print(f"🔧 Using virtual environment: {python_exe}")
+        else:
+            return False, "No virtual environment found. Please create one first."
         
         if not pip_cmd:
-            # Fall back to system Python
-            pip_cmd = [sys.executable, "-m", "pip"]
+            return False, "Virtual environment pip not available. Please recreate the virtual environment."
         
         for attempt in range(retries):
             try:
@@ -396,26 +400,28 @@ class DependencyChecker:
         return False, f"Failed to install requirements.txt after {retries} attempts"
 
     def install_project(self, retries: int = 2, use_venv: bool = True) -> Tuple[bool, str]:
-        """Install the project in editable mode with retry"""
+        """Install the project in editable mode with retry - VENV ONLY MODE"""
         if not self.pyproject_file.exists():
             return False, "pyproject.toml not found"
+        
+        # Enforce virtual environment usage
+        if not use_venv:
+            return False, "System Python installation is not allowed. Virtual environment is required."
         
         # Determine which Python/pip to use
         pip_cmd = None
         python_exe = None
         
-        if use_venv:
-            venv_pip = self.get_venv_pip_executable()
-            if venv_pip:
-                pip_cmd = venv_pip
-                python_exe = self.get_venv_python_executable()
-                print(f"🔧 Using virtual environment: {python_exe}")
-            else:
-                print("🔧 No virtual environment found, using system Python")
+        venv_pip = self.get_venv_pip_executable()
+        if venv_pip:
+            pip_cmd = venv_pip
+            python_exe = self.get_venv_python_executable()
+            print(f"🔧 Using virtual environment: {python_exe}")
+        else:
+            return False, "No virtual environment found. Please create one first."
         
         if not pip_cmd:
-            # Fall back to system Python
-            pip_cmd = [sys.executable, "-m", "pip"]
+            return False, "Virtual environment pip not available. Please recreate the virtual environment."
         
         for attempt in range(retries):
             try:
@@ -528,36 +534,22 @@ class DependencyChecker:
                 print(f"⚠️  {upgrade_msg}")
                 print("💡 Continuing with current pip version...")
         
-        # Check virtual environment
+        # Check virtual environment and require it
         venv_ok, venv_msg = self.check_virtual_env()
         print(f"🐍 {venv_msg}")
         
         use_venv = False
         if not venv_ok:
-            print("⚠️  Running in system Python may cause permission issues.")
-            print("💡 Consider using a virtual environment for better reliability.")
-            
-            # Offer to create virtual environment if there are permission issues
-            if len(missing_deps) > 5:  # Many missing deps suggests system Python issues
-                print("🤔 Would you like to create a virtual environment? (Recommended)")
-                print("   This will avoid permission issues and isolate dependencies.")
-                print("   The environment will be created at: ./venv")
-                
-                # Auto-create venv for better user experience
-                try:
-                    venv_success, venv_message = self.create_virtual_environment()
-                    if venv_success:
-                        print(f"✅ {venv_message}")
-                        print("� Using created virtual environment for installation...")
-                        use_venv = True
-                    else:
-                        print(f"❌ {venv_message}")
-                        print("🔄 Continuing with system Python...")
-                except Exception as e:
-                    print(f"❌ Could not create virtual environment: {e}")
-                    print("🔄 Continuing with system Python...")
+            print("🔧 ERROR: Not in virtual environment. Creating one for complete dependency isolation...")
+            venv_success, venv_message = self.create_virtual_environment()
+            if venv_success:
+                print(f"✅ {venv_message}")
+                print("🔧 Using created virtual environment for installation...")
+                use_venv = True
             else:
-                print("🔄 Installing with system Python (few dependencies missing)...")
+                print(f"❌ {venv_message}")
+                print("❌ ERROR: Virtual environment is required. Cannot proceed with system Python.")
+                return False
         else:
             use_venv = True
             print("🔧 Using existing virtual environment for installation...")
