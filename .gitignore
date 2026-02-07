@@ -209,6 +209,9 @@ pip-delete-this-directory.txt
 .dmypy.json
 dmypy.json
 
+# Requirements files (use pyproject.toml instead)
+requirements*.txt
+
 # Temporary files from dependency installation
 *.tmp
 *.temp
