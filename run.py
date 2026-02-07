@@ -49,6 +49,19 @@ def get_venv_python_path():
     
     return str(python_exe) if python_exe.exists() else None
 
+def check_venv_prerequisites():
+    """Check if virtual environment creation prerequisites are met"""
+    print("Checking virtual environment prerequisites...")
+    
+    # Test if venv module is available
+    try:
+        import venv
+        print("✓ venv module is available")
+        return True
+    except ImportError:
+        print("✗ venv module is not available")
+        return False
+
 def create_virtual_environment():
     """Create a virtual environment with robust error handling"""
     project_root = Path(__file__).parent
@@ -87,17 +100,39 @@ def create_virtual_environment():
         )
         
         if result.returncode != 0:
-            print(f"Failed to create virtual environment: {result.stderr}")
-            return False
+            error_msg = result.stderr.strip() or result.stdout.strip()
+            
+            # Handle specific error cases
+            if "ensurepip is not available" in error_msg or "python3-venv" in error_msg:
+                print("✗ Virtual environment creation failed: python3-venv package not installed")
+                print()
+                print("To fix this issue, run one of the following commands:")
+                print(f"  sudo apt install python3.{sys.version_info.minor}-venv")
+                print("  # or for Ubuntu/Debian systems:")
+                print("  sudo apt install python3-venv")
+                print()
+                print("After installing the package, run this script again.")
+                return False
+            elif "Permission denied" in error_msg:
+                print("✗ Permission denied when creating virtual environment")
+                print("Check that you have write permissions to the project directory")
+                return False
+            else:
+                print(f"✗ Failed to create virtual environment: {error_msg}")
+                print("Full error details:")
+                print(f"  Return code: {result.returncode}")
+                print(f"  Stderr: {result.stderr}")
+                print(f"  Stdout: {result.stdout}")
+                return False
         
         print("✓ Virtual environment created successfully")
         return True
         
     except subprocess.TimeoutExpired:
-        print("Virtual environment creation timed out")
+        print("✗ Virtual environment creation timed out")
         return False
     except Exception as e:
-        print(f"Error creating virtual environment: {e}")
+        print(f"✗ Error creating virtual environment: {e}")
         return False
 
 def restart_in_venv():
@@ -179,50 +214,77 @@ def install_dependencies():
             else:
                 print(f"pip upgrade error: {e}, retrying...")
     
-    # Install from requirements.txt if it exists
-    requirements_file = project_root / "requirements.txt"
-    if requirements_file.exists():
-        for attempt in range(max_retries):
-            try:
-                if attempt > 0:
-                    print(f"Retry {attempt + 1}/{max_retries} installing requirements.txt...")
-                else:
-                    print("Installing from requirements.txt...")
-                
-                result = subprocess.run([venv_python, "-m", "pip", "install", "-r", str(requirements_file)],
-                                      capture_output=True, text=True, timeout=600)
-                if result.returncode == 0:
-                    print("✓ requirements.txt installed")
-                    break
-                else:
-                    error_msg = result.stderr.strip()
-                    if attempt == max_retries - 1:
-                        print(f"requirements.txt installation failed after {max_retries} attempts: {error_msg}")
-                        
-                        # Provide helpful error messages
-                        if "Permission denied" in error_msg:
-                            print("Permission denied. Check antivirus software or file permissions.")
-                        elif "Could not find a version" in error_msg:
-                            print("Package version conflict. Check requirements.txt compatibility.")
-                        elif "Network is unreachable" in error_msg or "Connection failed" in error_msg:
-                            print("Network error. Check internet connection.")
-                        else:
-                            print("See error message above for details.")
-                        return False
+    # Install from requirements files if they exist
+    requirements_files = [
+        project_root / "requirements-core.txt",
+        project_root / "requirements.txt"  # fallback to original
+    ]
+    
+    for requirements_file in requirements_files:
+        if requirements_file.exists():
+            for attempt in range(max_retries):
+                try:
+                    if attempt > 0:
+                        print(f"Retry {attempt + 1}/{max_retries} installing {requirements_file.name}...")
                     else:
-                        print(f"requirements.txt attempt {attempt + 1} failed, retrying...")
-            except subprocess.TimeoutExpired:
-                if attempt == max_retries - 1:
-                    print("requirements.txt installation timed out")
-                    return False
-                else:
-                    print("requirements.txt installation timed out, retrying...")
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    print(f"requirements.txt installation error: {e}")
-                    return False
-                else:
-                    print(f"requirements.txt installation error: {e}, retrying...")
+                        print(f"Installing from {requirements_file.name}...")
+                    
+                    result = subprocess.run([venv_python, "-m", "pip", "install", "-r", str(requirements_file)],
+                                          capture_output=True, text=True, timeout=600)
+                    if result.returncode == 0:
+                        print(f"✓ {requirements_file.name} installed")
+                        
+                        # If we successfully installed core requirements, we're done
+                        if requirements_file.name == "requirements-core.txt":
+                            print("✓ Core dependencies installed successfully")
+                            print("Note: Optional ML/AI dependencies can be installed later with:")
+                            print("  pip install -r requirements-optional.txt")
+                            return True  # Success, exit the function
+                        break
+                    else:
+                        error_msg = result.stderr.strip()
+                        if attempt == max_retries - 1:
+                            print(f"{requirements_file.name} installation failed after {max_retries} attempts: {error_msg}")
+                            
+                            # Provide helpful error messages
+                            if "Permission denied" in error_msg:
+                                print("Permission denied. Check antivirus software or file permissions.")
+                            elif "Could not find a version" in error_msg:
+                                print("Package version conflict. Check requirements file compatibility.")
+                            elif "Network is unreachable" in error_msg or "Connection failed" in error_msg:
+                                print("Network error. Check internet connection.")
+                            else:
+                                print("See error message above for details.")
+                            
+                            # If this was requirements-core.txt that failed, return False
+                            # If it was requirements.txt that failed, we can continue (it's optional)
+                            if requirements_file.name == "requirements-core.txt":
+                                return False
+                            else:
+                                print("Continuing without optional dependencies...")
+                                return True  # Continue without optional deps
+                        else:
+                            print(f"{requirements_file.name} attempt {attempt + 1} failed, retrying...")
+                except subprocess.TimeoutExpired:
+                    if attempt == max_retries - 1:
+                        print(f"{requirements_file.name} installation timed out")
+                        if requirements_file.name == "requirements-core.txt":
+                            return False
+                        else:
+                            print("Continuing without optional dependencies...")
+                            return True  # Continue without optional deps
+                    else:
+                        print(f"{requirements_file.name} installation timed out, retrying...")
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        print(f"{requirements_file.name} installation error: {e}")
+                        if requirements_file.name == "requirements-core.txt":
+                            return False
+                        else:
+                            print("Continuing without optional dependencies...")
+                            return True  # Continue without optional deps
+                    else:
+                        print(f"{requirements_file.name} installation error: {e}, retrying...")
     
     # Install project in editable mode if pyproject.toml exists
     pyproject_file = project_root / "pyproject.toml"
@@ -248,6 +310,20 @@ def install_dependencies():
 def bootstrap_environment():
     """Bootstrap the environment - create venv and install dependencies"""
     print("Bootstrapping environment...")
+    
+    # Check prerequisites first
+    if not check_venv_prerequisites():
+        print()
+        print("Virtual environment prerequisites not met.")
+        print("This is likely because the python3-venv package is not installed.")
+        print()
+        print("To fix this issue, run one of the following commands:")
+        print(f"  sudo apt install python3.{sys.version_info.minor}-venv")
+        print("  # or for Ubuntu/Debian systems:")
+        print("  sudo apt install python3-venv")
+        print()
+        print("After installing the package, run this script again.")
+        return False
     
     # Create virtual environment
     if not create_virtual_environment():
