@@ -1,4 +1,5 @@
-# VEXIS-1
+
+<img width="1280" height="720" alt="VEXIS-1" src="https://github.com/user-attachments/assets/25197a5b-7b0f-4c78-9968-719dafdc4eed" />
 
 VEXIS-1 is a powerful vision-based AI agent for GUI automation that uses computer vision to understand and interact with graphical user interfaces.
 
