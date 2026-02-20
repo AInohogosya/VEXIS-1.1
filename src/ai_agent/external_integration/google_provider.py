@@ -1,5 +1,5 @@
 """
-Google API Provider for VEXIS-1 AI Agent
+Google API Provider for VEXIS-1.1 AI Agent
 Handles communication with Google Gemini API
 """
 

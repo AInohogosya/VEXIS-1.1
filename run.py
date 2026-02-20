@@ -341,7 +341,7 @@ def bootstrap_environment():
 
 def show_help():
     """Show help message"""
-    print("VEXIS-1 AI Agent Runner")
+    print("VEXIS-1.1 AI Agent Runner")
     print("=" * 50)
     print("Usage: python3 run.py \"your instruction here\"")
     print()
@@ -454,7 +454,7 @@ def select_model_provider():
     current_provider = settings_manager.get_preferred_provider()
     
     print("\n" + "=" * 50)
-    print("VEXIS-1 AI Agent - Model Provider Selection")
+    print("VEXIS-1.1 AI Agent - Model Provider Selection")
     print("=" * 50)
     print()
     print("Choose your AI model provider:")

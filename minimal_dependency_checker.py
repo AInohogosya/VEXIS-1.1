@@ -620,7 +620,7 @@ class MinimalDependencyChecker:
 
     def run_full_check(self, auto_install: bool = True, clean_venv: bool = False) -> bool:
         """Run comprehensive dependency check"""
-        print("Starting dependency check for VEXIS-1 AI Agent\n")
+        print("Starting dependency check for VEXIS-1.1 AI Agent\n")
         
         # Delete all existing virtual environments if requested
         if clean_venv:

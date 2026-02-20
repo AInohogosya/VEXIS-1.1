@@ -1,5 +1,5 @@
 """
-Settings Manager for VEXIS-1 AI Agent
+Settings Manager for VEXIS-1.1 AI Agent
 Handles API key storage and model configuration
 """
 

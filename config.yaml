@@ -1,4 +1,5 @@
-# VEXIS-1 Configuration
+# VEXIS-1.1 Configuration
+# Version: 1.1 (simplified versioning - 0.0.1 increments omitted)
 # Set AI_AGENT_LOCAL_ENDPOINT environment variable to override local_endpoint
 
 api:

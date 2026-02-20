@@ -14,13 +14,15 @@
 
 VEXIS-1.1 is an advanced AI agent that combines computer vision with intelligent automation to interact with graphical user interfaces naturally. By understanding screen content and context, VEXIS-1.1 can perform complex tasks across applications with human-like precision.
 
+> **Version Note**: VEXIS-1.1 uses simplified versioning (v1.1 instead of v1.1.0.1) with 0.0.1 increments omitted to reduce maintenance complexity while preserving full compatibility.
+
 ## 🚀 Quick Start
 
 Get VEXIS-1.1 running in seconds with zero configuration:
 
 ```bash
 git clone https://github.com/AInohogosya/VEXIS-1.git
-cd VEXIS-1
+cd VEXIS-1.1
 python3 run.py "take a screenshot"
 ```
 
@@ -75,7 +77,7 @@ VEXIS-1.1 can execute actions including file deletion, purchases, and email send
 
 ```bash
 git clone https://github.com/AInohogosya/VEXIS-1.git
-cd VEXIS-1
+cd VEXIS-1.1
 python3 run.py "take a screenshot"
 ```
 
@@ -89,7 +91,7 @@ python3 run.py "take a screenshot"
 
 ```bash
 git clone https://github.com/AInohogosya/VEXIS-1.git
-cd VEXIS-1
+cd VEXIS-1.1
 pip install -e .
 ```
 
@@ -238,6 +240,20 @@ black src/          # Code formatting and style enforcement
 mypy src/           # Static type analysis and validation
 ```
 
+## 🤝 Join Our Development Community
+
+We welcome contributors of all skill levels and backgrounds! Whether you're interested in writing code, identifying bugs, or sharing innovative ideas, there's a place for you in the VEXIS-1.1 ecosystem.
+
+**How to Get Involved:**
+- **Code Contributors**: Help implement new features, fix bugs, or improve existing functionality
+- **Bug Hunters**: Test the system, report issues, and help us identify edge cases
+- **Idea Contributors**: Suggest improvements, new capabilities, or innovative use cases
+
+**Join the Team:**
+Ready to become part of our development organization? Reply to our announcement tweet: https://x.com/AInohogosya/status/2024452785643933966
+
+While we can't implement every suggestion, we value all contributions and ideas. Code contributions are especially welcome, but we believe that great ideas and thorough testing are just as valuable to the project's success.
+
 ## 📄 License & Contributions
 
 - **License**: MIT License - see [LICENSE](LICENSE) for complete terms
@@ -254,8 +270,8 @@ mypy src/           # Static type analysis and validation
 
 ```bash
 # Post-installation commands
-vexis-1              # Standard AI agent interface
-vexis-1-enhanced     # Advanced two-phase execution engine
+vexis-1.1              # Standard AI agent interface
+vexis-1.1-enhanced     # Advanced two-phase execution engine
 pytest              # Comprehensive test execution
 black src/          # Automated code formatting
 mypy src/           # Static type checking and analysis

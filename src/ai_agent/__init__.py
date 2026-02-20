@@ -1,11 +1,14 @@
 """
 AI Agent System - Vision-based GUI automation
 Production-ready implementation with zero-defect policy
+
+Version Note: VEXIS-1.1 uses simplified versioning (1.1 instead of 1.1.0.1)
+with 0.0.1 increments omitted to reduce complexity while maintaining compatibility.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1"
 __author__ = "AI Agent Team"
-__email__ = "contact@vexis-1.org"
+__email__ = "contact@vexis-1.1.org"
 __description__ = "Vision-based AI agent for GUI automation"
 
 # Import core components for easy access

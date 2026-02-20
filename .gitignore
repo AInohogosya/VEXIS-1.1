@@ -210,7 +210,7 @@ pip-delete-this-directory.txt
 .dmypy.json
 dmypy.json
 
-# VEXIS-1 specific settings and credentials
+# VEXIS-1.1 specific settings and credentials
 .vexis/
 .vexis_settings.json
 
