@@ -133,7 +133,7 @@ class TaskGenerator:
                 raise TaskGenerationError("No valid tasks found in AI response")
             
             # Limit number of tasks based on complexity
-            max_tasks = 15  # Hard limit for safety
+            max_tasks = 750  # Hard limit for safety
             if len(tasks) > max_tasks:
                 tasks = tasks[:max_tasks]
                 self.logger.warning(f"Task list truncated to {max_tasks} tasks")
