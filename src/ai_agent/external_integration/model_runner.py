@@ -241,7 +241,10 @@ class ModelRunner:
             preferred_provider = self.config.get("preferred_provider", "ollama")
             if preferred_provider == "google" and self.config.get("google_api_key"):
                 provider_enum = APIProvider.GOOGLE
-                model_name = "gemini-3-flash-preview"  # Google's model
+                # Use the selected Google model from settings
+                from ..utils.settings_manager import get_settings_manager
+                settings_manager = get_settings_manager()
+                model_name = settings_manager.get_google_model()
             else:
                 provider_enum = APIProvider.OLLAMA
                 model_name = self.config.get("local_model", "gemini-3-flash-preview:latest")

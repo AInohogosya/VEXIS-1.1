@@ -66,8 +66,8 @@ test = [
 ]
 
 [project.scripts]
-vexis-1.1 = "ai_agent.user_interface.main_app:main"
-vexis-1.1-enhanced = "ai_agent.user_interface.two_phase_app:main"
+"vexis-1.1" = "ai_agent.user_interface.main_app:main"
+"vexis-1.1-enhanced" = "ai_agent.user_interface.two_phase_app:main"
 
 [project.urls]
 Homepage = "https://github.com/AInohogosya/VEXIS-1"

@@ -355,6 +355,8 @@ def show_help():
     print("Model Options:")
     print("  • Ollama: Local models via Ollama (requires ollama signin)")
     print("  • Google API: Official Google Gemini API (requires API key)")
+    print("    - Gemini 3 Flash: Fast and cost-effective")
+    print("    - Gemini 3.1 Pro: Advanced reasoning for complex tasks")
     print()
     print("Examples:")
     print("  python3 run.py \"Take a screenshot\"")
@@ -446,38 +448,133 @@ def prompt_for_google_api_key():
             print(f"Error reading input: {e}")
             return None
 
+def select_google_model():
+    """Prompt user to select Google model with improved UI"""
+    from src.ai_agent.utils.settings_manager import get_settings_manager
+    
+    settings_manager = get_settings_manager()
+    current_model = settings_manager.get_google_model()
+    
+    print("\n" + "=" * 60)
+    print("Google Gemini Model Selection")
+    print("=" * 60)
+    print()
+    print("Available models:")
+    print()
+    print("  🚀 Gemini 3 Flash")
+    print("     • Fast and efficient")
+    print("     • Cost-effective for most tasks")
+    print("     • Quick response times")
+    print()
+    print("  🧠 Gemini 3.1 Pro")
+    print("     • Advanced reasoning capabilities")
+    print("     • Best for complex problem-solving")
+    print("     • Superior performance on difficult tasks")
+    print()
+    
+    # Show current selection
+    if current_model == "gemini-3-flash-preview":
+        print(f"Current selection: 🚀 Gemini 3 Flash")
+    else:
+        print(f"Current selection: 🧠 Gemini 3.1 Pro")
+    
+    print()
+    print("Choose your model:")
+    print("  [1] 🚀 Gemini 3 Flash")
+    print("  [2] 🧠 Gemini 3.1 Pro")
+    print("  [Enter] Use current selection")
+    print()
+    
+    while True:
+        try:
+            choice = input("Your choice (1/2/Enter) [default: current]: ").strip()
+            
+            if not choice:
+                # Use current selection
+                selected_model = current_model
+                model_name = "Gemini 3 Flash" if current_model == "gemini-3-flash-preview" else "Gemini 3.1 Pro"
+                print(f"\n✓ Using current selection: {model_name}")
+                return current_model
+            
+            if choice == "1":
+                selected_model = "gemini-3-flash-preview"
+                model_name = "Gemini 3 Flash"
+                break
+            elif choice == "2":
+                selected_model = "gemini-3.1-pro-preview"
+                model_name = "Gemini 3.1 Pro"
+                break
+            else:
+                print("Invalid choice. Please enter 1, 2, or press Enter for current selection.")
+                
+        except KeyboardInterrupt:
+            print("\nOperation cancelled. Using current selection.")
+            return current_model
+        except Exception as e:
+            print(f"Error: {e}")
+            continue
+    
+    # Save the selection
+    settings_manager.set_google_model(selected_model)
+    print(f"\n✓ Model set to: {model_name}")
+    return selected_model
+
 def select_model_provider():
-    """Prompt user to select model provider"""
+    """Prompt user to select model provider with improved UI"""
     from src.ai_agent.utils.settings_manager import get_settings_manager
     
     settings_manager = get_settings_manager()
     current_provider = settings_manager.get_preferred_provider()
     
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print("VEXIS-1.1 AI Agent - Model Provider Selection")
-    print("=" * 50)
+    print("=" * 60)
     print()
     print("Choose your AI model provider:")
-    print("1. Ollama (Local models)")
-    print("2. Google Official API (Gemini)")
+    print()
+    print("  🦊 Ollama (Local Models)")
+    print("     • Run models locally on your machine")
+    print("     • Privacy-focused - data stays local")
+    print("     • Requires Ollama installation and sign-in")
+    print()
+    print("  🌐 Google Official API (Gemini)")
+    print("     • Cloud-based AI models")
+    print("     • No local setup required")
+    print("     • Requires Google API key")
     print()
     
+    # Show current preference
     if current_provider == "ollama":
-        print(f"Current preference: Ollama")
+        print(f"Current preference: 🦊 Ollama")
     elif current_provider == "google":
-        print(f"Current preference: Google API")
+        print(f"Current preference: 🌐 Google API")
     
+    print()
+    print("Choose your provider:")
+    print("  [1] 🦊 Ollama (Local Models)")
+    print("  [2] 🌐 Google Official API (Gemini)")
+    print("  [Enter] Use current preference")
     print()
     
     while True:
         try:
-            choice = input("Select provider (1/2) [default: 1]: ").strip()
+            choice = input("Your choice (1/2/Enter) [default: current]: ").strip()
+            
             if not choice:
-                choice = "1"
+                # Use current preference
+                selected_provider = current_provider
+                provider_name = "Ollama" if current_provider == "ollama" else "Google API"
+                print(f"\n✓ Using current preference: {provider_name}")
+                
+                # If Google is selected, prompt for model selection
+                if selected_provider == "google":
+                    select_google_model()
+                
+                return selected_provider
             
             if choice == "1":
                 # Ollama selected
-                print("\nYou selected: Ollama (Local models)")
+                print("\nYou selected: 🦊 Ollama (Local Models)")
                 if not check_ollama_login():
                     print("Failed to set up Ollama. Please try again or choose Google API.")
                     continue
@@ -488,13 +585,16 @@ def select_model_provider():
                 
             elif choice == "2":
                 # Google API selected
-                print("\nYou selected: Google Official API (Gemini)")
+                print("\nYou selected: 🌐 Google Official API (Gemini)")
                 
                 # Check if API key already exists
                 if settings_manager.has_google_api_key():
                     print("✓ Google API key is already configured")
                     settings_manager.set_preferred_provider("google")
                     print("✓ Provider set to Google API")
+                    
+                    # Prompt for model selection
+                    select_google_model()
                     return "google"
                 
                 # Prompt for API key
@@ -509,10 +609,13 @@ def select_model_provider():
                 
                 print("✓ Google API key configured")
                 print("✓ Provider set to Google API")
+                
+                # Prompt for model selection
+                select_google_model()
                 return "google"
                 
             else:
-                print("Invalid choice. Please enter 1 or 2.")
+                print("Invalid choice. Please enter 1, 2, or press Enter for current preference.")
                 
         except KeyboardInterrupt:
             print("\nOperation cancelled. Exiting.")
@@ -618,6 +721,7 @@ def main():
                 updated_config = model_runner.config.copy()
                 updated_config['preferred_provider'] = selected_provider
                 updated_config['google_api_key'] = settings_manager.get_google_api_key()
+                updated_config['google_model'] = settings_manager.get_google_model()
                 
                 # Reinitialize vision client with updated config
                 model_runner.vision_client.config = updated_config

@@ -18,6 +18,7 @@ class APISettings:
     google_api_key: Optional[str] = None
     preferred_provider: str = "ollama"  # "ollama" or "google"
     save_api_key: bool = True
+    google_model: str = "gemini-3-flash-preview"  # Default Google model
 
 
 class SettingsManager:
@@ -87,6 +88,19 @@ class SettingsManager:
         self._settings.google_api_key = None
         self._save_settings()
         self.logger.info("Google API key cleared")
+    
+    def set_google_model(self, model: str):
+        """Set Google model"""
+        valid_models = ["gemini-3-flash-preview", "gemini-3.1-pro-preview"]
+        if model not in valid_models:
+            raise ValueError(f"Model must be one of: {valid_models}")
+        self._settings.google_model = model
+        self._save_settings()
+        self.logger.info(f"Google model set to: {model}")
+    
+    def get_google_model(self) -> str:
+        """Get Google model"""
+        return self._settings.google_model
 
 
 # Global settings manager instance
