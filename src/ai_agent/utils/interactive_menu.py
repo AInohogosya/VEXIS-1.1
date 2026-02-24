@@ -177,16 +177,69 @@ class InteractiveMenu:
         
         return panel
     
+    def _print_menu_simple(self):
+        """Print the menu using simple print statements for interactive updates"""
+        # Create title text
+        title_text = f"{self.title}\n{'=' * len(self.title)}"
+        
+        # Build menu content
+        lines = []
+        
+        if self.subtitle:
+            lines.append(self.subtitle)
+            lines.append("")
+        
+        # Show current preference if available
+        if self.show_current and self.current_value:
+            for item in self.items:
+                if item.value == self.current_value:
+                    lines.append(f"{Colors.BRIGHT_GREEN}Current preference: {item.icon} {item.title}{Colors.RESET}")
+                    break
+            lines.append("")
+        
+        # Menu items
+        for i, item in enumerate(self.items):
+            if i == self.current_selection:
+                # Selected item - highlight with colors
+                lines.append(f"{Colors.BG_BRIGHT_BLUE}{Colors.WHITE}  ▶ {item.icon} {item.title}{Colors.RESET}")
+                if item.description:
+                    lines.append(f"{Colors.BG_BRIGHT_BLUE}{Colors.WHITE}     {item.description}{Colors.RESET}")
+            else:
+                # Normal item
+                lines.append(f"{Colors.WHITE}  {item.icon} {item.title}{Colors.RESET}")
+                if item.description:
+                    lines.append(f"{Colors.BRIGHT_BLACK}    {item.description}{Colors.RESET}")
+            lines.append("")
+        
+        # Instructions
+        lines.extend([
+            "",
+            f"{Colors.BRIGHT_YELLOW}Instructions:{Colors.RESET}",
+            f"{Colors.CYAN}  ↑/↓  Navigate menu{Colors.RESET}",
+            f"{Colors.CYAN}  Enter  Select option{Colors.RESET}",
+            f"{Colors.CYAN}  q/Ctrl+C  Cancel{Colors.RESET}",
+            ""
+        ])
+        
+        # Print everything
+        print(f"{Colors.BOLD}{Colors.BRIGHT_CYAN}{title_text}{Colors.RESET}")
+        for line in lines:
+            print(line)
+    
     def show(self) -> Optional[str]:
         """Display the interactive menu and return selected value"""
         if not self.items:
             return None
         
-        # Simple approach: clear and redraw
+        # Clear screen initially
+        print("\033[2J\033[H", end="")
+        
         while not self._should_exit:
-            # Clear screen and redraw menu
-            print("\033[2J\033[H", end="")
-            self.console.print(self._render_menu())
+            # Move cursor to top-left and clear from cursor to end of screen
+            print("\033[H\033[J", end="")
+            
+            # Print the menu directly (without Rich for interactive updates)
+            self._print_menu_simple()
             
             try:
                 key = self._get_key()
@@ -198,32 +251,30 @@ class InteractiveMenu:
                 elif key in ('\r', '\n'):  # Enter
                     selected_item = self.items[self.current_selection]
                     self._should_exit = True
-                    # Clear and show selection
-                    print("\033[2J\033[H", end="")
-                    self.console.print(f"✓ Selected: {selected_item.icon} {selected_item.title}", style="bright_green")
+                    # Clear screen and show final selection
+                    print("\033[H\033[J", end="")
+                    print(f"{Colors.BRIGHT_GREEN}✓ Selected: {selected_item.icon} {selected_item.title}{Colors.RESET}")
                     return selected_item.value
                 elif key.lower() == 'q':
                     self._should_exit = True
-                    # Clear and show cancellation
-                    print("\033[2J\033[H", end="")
-                    self.console.print("Operation cancelled", style="bright_yellow")
+                    print("\033[H\033[J", end="")
+                    print(f"{Colors.BRIGHT_YELLOW}Operation cancelled{Colors.RESET}")
                     return None
                 elif key == '\x03':  # Ctrl+C
                     self._should_exit = True
-                    # Clear and show cancellation
-                    print("\033[2J\033[H", end="")
-                    self.console.print("Operation cancelled", style="bright_yellow")
+                    print("\033[H\033[J", end="")
+                    print(f"{Colors.BRIGHT_YELLOW}Operation cancelled{Colors.RESET}")
                     return None
                     
             except KeyboardInterrupt:
                 self._should_exit = True
-                print("\033[2J\033[H", end="")
-                self.console.print("Operation cancelled", style="bright_yellow")
+                print("\033[H\033[J", end="")
+                print(f"{Colors.BRIGHT_YELLOW}Operation cancelled{Colors.RESET}")
                 return None
             except Exception as e:
                 self._should_exit = True
-                print("\033[2J\033[H", end="")
-                self.console.print(f"Error reading input: {e}", style="red")
+                print("\033[H\033[J", end="")
+                print(f"{Colors.BRIGHT_RED}Error reading input: {e}{Colors.RESET}")
                 return None
         
         return None
