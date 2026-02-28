@@ -1,64 +1,56 @@
+<div align="center">
+
 # VEXIS-1.1
 
-**VEXIS-1.1** is a desktop AI agent that observes your screen to make decisions and automate operations on your OS (app interactions, file operations, browser actions, etc.).  
-It can be configured to use Google's latest model, *Gemini 3*, as its base model.
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Experimental-orange?style=flat-square)]()
+
+**Your AI agent that watches your screen and automates everything**
+
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Requirements](#requirements)
+
+</div>
+
+---
+
+## About
+
+**VEXIS-1.1** is a personal AI desktop agent that observes your screen in real-time to make decisions and automate operations on your OS. Whether it's clicking buttons, filling forms, browsing the web, or managing files, just describe what you want and let the AI handle it.
+
+Powered by [Google's Gemini 3](https://deepmind.google/technologies/gemini/) for intelligent decision-making.
+
+> **Note:** This is an experimental project. It works great for many tasks but may surprise you sometimes. Use with curiosity!
 
 ---
 
 ## Features
 
-- Decision-making and operations based on screen captures
-- Supports mouse operations and keyboard input
-- Automates browser and application operations
-- Executable with a single command line (format: `python3 run.py "command"`)
+- **Screen-based decision making** - Analyzes screenshots to understand context
+- **Full OS control** - Mouse clicks, keyboard input, app interactions
+- **Web automation** - Search, fill forms, navigate sites automatically  
+- **File operations** - Create, move, organize files and folders
+- **One-liner execution** - Simple command: `python3 run.py "do something"`
 
 ---
 
 ## Requirements
 
-- Python 3.9 or higher
-- OS: Windows / macOS / Desktop Linux
-- API key (required when using Gemini 3 series models)
-- ollama account (required when running Gemini 3 Flash as a cloud model)
+| Requirement | Details |
+|----------|---------|
+| **Python** | 3.9 or higher |
+| **OS** | Windows, macOS, or Linux |
+| **API Key** | Gemini 3 series (get from [Google AI Studio](https://aistudio.google.com)) |
+| **Optional** | ollama account for Gemini 3 Flash cloud model |
 
 ---
 
 ## Installation
 
 ```bash
+# Clone the repository
 git clone https://github.com/AInohogosya/VEXIS-1.1.git
 cd VEXIS-1.1
-````
 
----
-
-## Usage
-
-```bash
-python run.py "Natural language instructions for desired actions"
-```
-
-The AI will perform actions while viewing the screen.
-
----
-
-## Capabilities
-
-* Web search and auto-fill
-* Folder and file operations
-* Basic operations in various applications
-
-> ※ Results may vary depending on usage and environment.
-
----
-
-## Precautions
-
-* Currently experimental; potential for incorrect operations.
-* Use only after thorough verification for critical tasks.
-
----
-
-## Author
-
-AInohogosya
+# Install dependencies (optional but recommended)
+pip install -r requirements.txt
