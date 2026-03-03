@@ -478,6 +478,13 @@ def select_google_model():
         "🧠"
     )
     
+    menu.add_item(
+        "Gemini 3.1 Flash-Lite",
+        "Most cost-efficient • Fastest for high-volume tasks • $0.25/1M input tokens",
+        "gemini-3.1-flash-lite-preview",
+        "⚡"
+    )
+    
     menu.set_current_selection(current_model)
     selected_model = menu.show()
     
@@ -500,7 +507,14 @@ def show_config_summary(provider: str, model: str = None):
     else:
         print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Google Official API{Colors.RESET}")
         if model:
-            model_name = "Gemini 3 Flash" if model == "gemini-3-flash-preview" else "Gemini 3.1 Pro"
+            if model == "gemini-3-flash-preview":
+                model_name = "Gemini 3 Flash"
+            elif model == "gemini-3.1-pro-preview":
+                model_name = "Gemini 3.1 Pro"
+            elif model == "gemini-3.1-flash-lite-preview":
+                model_name = "Gemini 3.1 Flash-Lite"
+            else:
+                model_name = model
             print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{model_name}{Colors.RESET}")
     
     

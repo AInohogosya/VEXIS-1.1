@@ -32,6 +32,7 @@ class GoogleProvider(BaseAPIProvider):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.api_key = config.get("google_api_key")
+        # Default endpoint, will be updated based on model
         self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
         
     @property
@@ -87,7 +88,8 @@ class GoogleProvider(BaseAPIProvider):
                 })
             
             # Make API call
-            url = f"{self.endpoint}?key={self.api_key}"
+            model_name = request.model or self.default_model
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
             headers = {"Content-Type": "application/json"}
             
             response = requests.post(
@@ -143,12 +145,21 @@ class GoogleProvider(BaseAPIProvider):
     
     def _calculate_cost(self, model: str, tokens: Optional[int] = None) -> Optional[float]:
         """Calculate cost for Google Gemini API"""
-        # Pricing for Gemini 1.5 Flash (as of 2024)
-        # These are approximate costs and may change
+        # Pricing information (as of March 2026)
         if model.startswith("gemini-3-flash-preview"):
+            # Gemini 3 Flash: ~$0.075/1M input, $0.15/1M output
             if tokens:
-                # Input: $0.075 per 1M tokens, Output: $0.15 per 1M tokens
-                # Assuming 50% input, 50% output for estimation
                 estimated_cost = (tokens * 0.0001125) / 1000000  # Average cost
+                return round(estimated_cost, 6)
+        elif model.startswith("gemini-3.1-pro-preview"):
+            # Gemini 3.1 Pro: Higher tier pricing
+            if tokens:
+                estimated_cost = (tokens * 0.001) / 1000000  # Estimated average
+                return round(estimated_cost, 6)
+        elif model.startswith("gemini-3.1-flash-lite-preview"):
+            # Gemini 3.1 Flash-Lite: $0.25/1M input, $1.50/1M output
+            if tokens:
+                # Assuming 70% input, 30% output for estimation
+                estimated_cost = (tokens * (0.25 * 0.7 + 1.50 * 0.3)) / 1000000
                 return round(estimated_cost, 6)
         return None
