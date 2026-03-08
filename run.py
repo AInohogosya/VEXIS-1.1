@@ -353,7 +353,7 @@ def show_help():
     print("  • Self-bootstrapping")
     print()
     print("Model Options:")
-    print("  • Ollama: Local models via Ollama (requires ollama signin)")
+    print("  • Ollama: Models via Ollama (requires ollama signin)")
     print("  • Google API: Official Google Gemini API (requires API key)")
     print("    - Gemini 3 Flash: Fast and cost-effective")
     print("    - Gemini 3.1 Pro: Advanced reasoning for complex tasks")
@@ -503,7 +503,7 @@ def show_config_summary(provider: str, model: str = None):
     print(f"{Colors.BOLD}{Colors.BRIGHT_CYAN}{'─' * 50}{Colors.RESET}")
     
     if provider == "ollama":
-        print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Ollama (Local Models){Colors.RESET}")
+        print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Ollama{Colors.RESET}")
     else:
         print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Google Official API{Colors.RESET}")
         if model:
@@ -583,8 +583,8 @@ def select_model_provider():
     )
     
     menu.add_item(
-        "Ollama (Local)",
-        "Run models locally via Ollama • Privacy-focused",
+        "Ollama",
+        "Run models via Ollama • Privacy-focused",
         "ollama",
         "🦊"
     )
