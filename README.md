@@ -1,5 +1,9 @@
 # VEXIS-1.2
 
+**AInohogosya (the developer of VEXIS) recommends using VEXIS-CLI-1.2, a more accurate AI agent.**
+
+Click here for the VEXIS-CLI-1.2 repository → https://github.com/AInohogosya/VEXIS-CLI-1.2
+
 ![VEXIS-1.2](image.png)
 
 ## Overview
